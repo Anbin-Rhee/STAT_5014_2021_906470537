@@ -1,0 +1,121 @@
+---
+title: "HW2_Anbin"
+author: "Anbin Rhee"
+date: "9/14/2021"
+output: pdf_document
+---
+
+
+## Problem 1
+I read the article and checked out the tutorials.
+
+## Problem 2
+### Part A
+Below are things I hope to get from this Stat Progr Packages class.
+
+\begin{itemize}
+  \item Learning how to use GitHub and getting used to it
+  \item Being better at visualizing data using R
+  \item Being proficient in reproducible research
+  \item Learning how to use variety of R packages (Good programming practice)
+\end{itemize}
+
+### Prat B
+Below three distributions are Normal, Gamma, Exponential distributions, respectively.
+
+#### Normal Distribution
+\begin{eqnarray}
+f(X=x|\mu, \sigma^2) &=& \frac{1}{\sqrt{2 \pi} \sigma} e^{-\frac{(x-\mu)^2}{2 \sigma^2}} ;\:\: -\infty < x < \infty ;\:\: -\infty < \mu < \infty, \sigma > 0
+\end{eqnarray}
+
+#### Gamma Distribution
+\begin{eqnarray}
+f(X=x|\alpha, \beta) &=& \frac{1}{\Gamma(\alpha) \beta^{\alpha}} x^{\alpha-1} e^{-\frac{x}{\beta}} ;\:\: 0 \leq x < \infty ;\:\: \alpha, \beta > 0
+\end{eqnarray}
+
+#### Exponential Distribution
+\begin{eqnarray}
+f(X=x|\beta) &=& \frac{1}{\beta} e^{-\frac{x}{\beta}} ;\:\: 0 \leq x < \infty ;\:\: \beta > 0
+\end{eqnarray}
+
+## Problem 3
+\begin{enumerate}
+  \item Record the way it was produced for every result. It might be challenging for me when the project is huge and complicated.
+  \item As manual procedures are hard to reproduce as well as inefficient and error-prone, it is recommended to avoid manual data manipulation steps. In order to avoid such steps, it is important to enhance my programming skills.
+  \item Record exact versions of every external programs used in the research. If there are lots of external programs in the project, it should be thoroughly examined.
+  \item Use a version control system for all custom scripts. It is important to know how to run such systems.
+  \item In standardized format, record every intermediate results. It could be challenging when there are lots of results in the research.
+  \item For visual consistency between figures, store raw data behind plots. If one data is connected to multiple plots, it is important to store it for all of connected plots.
+  \item To validate and understand the research result, it is good to inspect the summaries and generating hierarchical analysis output is useful for doing it. It is critical to know each steps of the hierachical anlysis. 
+  \item Give public access to all scripts, runs, and results in the research. It is crucial to make public to easily access to the research.
+\end{enumerate}
+
+## Problem 4
+### Part A
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r data, echo=FALSE}
+library(data.table)
+covid_raw <- fread("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv")
+us <- covid_raw[covid_raw$countriesAndTerritories == 'United_States_of_America',]
+us_filtered <- us[us$month %in% c(6:7),]
+us_filtered$index <- rev(1:dim(us_filtered)[1]) 
+fit<-lm(`Cumulative_number_for_14_days_of_COVID-19_cases_per_100000`~index, data=us_filtered)
+```
+
+```{r #4 PartA}
+summary(us_filtered)
+sum(is.na(us_filtered))
+```
+
+We have limited ourselves to 61 time points.
+As the sum of NA is zero, there is no missing value.
+
+
+### Part B
+
+I plotted residuals vs fitted plot, normal Q-Q plot, scale-location plot, residuals vs leverage plot. 
+
+```{r #4 PartB 1, echo=FALSE}
+library(stargazer)
+```
+
+```{r #4 PartB 2}
+summary.lm(fit)
+```
+
+```{r #4 PartB 3, echo=FALSE}
+library(broom)
+```
+
+```{r #4 PartB 4}
+fit.diags <- broom::augment(fit)
+plot(fit,1)
+plot(fit,2)
+plot(fit,3)
+plot(fit,5)
+```
+
+### Part C
+I created auto correlation plot of the residuals.
+
+```{r #4 PartC}
+residual <- fit.diags$.resid
+acf(residual)
+```
+
+## Problem 5
+
+I combined the four plots from Problem 4 into a single plot with the smallest margin.
+```{r #5}
+par(mfrow=c(2,2),mar=c(2,2,2,1))
+plot(fit,1)
+plot(fit,2)
+plot(fit,3)
+plot(fit,5)
+```
+
+## Problem 6
+I knitted this documentto PDF and pushed to GitHub.
