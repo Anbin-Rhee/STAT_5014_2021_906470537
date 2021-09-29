@@ -1,0 +1,52 @@
+---
+title: "HW3_906470537"
+author: "Anbin Rhee"
+date: "9/29/2021"
+output: pdf_document
+---
+
+## Problem 1, 2
+
+I saw "Visualize Data" and search more to know how to work with ggplot2.
+
+## Problem 3
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r data}
+library(data.table)
+library(broom)
+library(ggplot2)
+library(ggfortify)
+covid_raw <- fread("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv")
+us <- covid_raw[covid_raw$countriesAndTerritories == 'United_States_of_America',]
+us_filtered <- us[us$month %in% c(6:7),]
+us_filtered$index <- rev(1:dim(us_filtered)[1]) 
+fit<-lm(`Cumulative_number_for_14_days_of_COVID-19_cases_per_100000`~index, data=us_filtered)
+fit.diags <- broom::augment(fit)
+#library(ggplot2)
+```
+
+```{r Problem 3}
+
+ggplot2::autoplot(fit, 1)
+ggplot2::autoplot(fit, 2)
+ggplot2::autoplot(fit, 3)
+ggplot2::autoplot(fit, 5)
+```
+
+## Problem 4
+
+I put the four plots in a single multipanel plot.
+
+```{r Problem 4}
+par(mfrow=c(2,2), mar = c(1,1,1.5,0.5), oma=c(1,1,0,0))
+ggplot2::autoplot(fit, c(1,2,3,5))
+```
+
+
+## Problem 5
+
+I knitted this document to pdf and pushed to GitHub.
