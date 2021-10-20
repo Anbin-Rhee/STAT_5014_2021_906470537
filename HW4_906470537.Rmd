@@ -1,0 +1,180 @@
+---
+title: "Homework4"
+author: "Anbin Rhee"
+date: "10/20/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Problem 1
+If I need a bit more work with the tidyverse, I will check out Rstudio.cloud Primer titled “Tidy your data”.
+
+# Problem 2
+I used R Markdown file for this homework.
+
+# Problem 3
+
+## Part A
+```{r Part A 1}
+library(dplyr)
+library(tidyr)
+library(reshape)
+PartA <- read.delim("https://www2.isye.gatech.edu/~jeffwu/wuhamadabook/data/ThicknessGauge.dat",header = FALSE, skip = 2, sep=" ")
+colnames(PartA) <- c("part","1.1","1.2","2.1","2.2","3.1","3.2")
+PartA <- melt(PartA, id.vars = "part")
+PartA <- separate(data = PartA, col = 'variable',into = c("operator", "measurement"))
+```
+
+I imported the data and renamed the columns as "1.1", "1.2", "2.1", "2.2", "3.1", and "3.2". 
+Then, I rearranged the data in order to the observations to be distinguished and separated the observations by operator and measurement.
+
+```{r Part A 3}
+PartA$part <- factor(PartA$part)
+PartA$operator <- factor(PartA$operator)
+PartA$measurement <- factor(PartA$measurement)
+summary(PartA)
+knitr::kable(PartA, caption = "Measurements of the part’s wall thickness")
+PartAplot <- aggregate(x = PartA$value, by = list(PartA$part, PartA$operator), FUN = mean)
+PartAplot['difference'] <- PartAplot$x - mean(PartAplot$x)
+par(xpd=TRUE)
+barplot(difference ~ Group.2 + Group.1,
+        data = PartAplot,
+        beside = TRUE,
+        xlab = "Part",
+        ylab = "Difference from the mean value of measurement",
+        col = c("red", "blue", "purple"),
+        ylim = c(-0.005,0.003),
+        border = NA)
+legend("bottomright", c("Operator 1", "Operator 2","Operator 3"),
+       fill = c("red", "blue", "purple"), border = NA)
+```
+
+I showed the data as table form and drew a plot which shows the difference from the mean value of measurements. 
+
+## Part B
+```{r Part B 1}
+PartB <- read.delim("https://www2.isye.gatech.edu/~jeffwu/wuhamadabook/data/BrainandBodyWeight.dat", header = FALSE, skip = 1, sep = " ")
+
+# rename the columns
+colnames(PartB) <- rep(c("BodyWeight", "BrainWeight"), 3)
+# rearrange data frame to 2 columns
+PartB <- rbind(PartB[,1:2], PartB[,3:4], PartB[1:20,5:6])
+```
+
+I imported the data of Part B and renamed the columns as "Body Weight" and "Brain Weight". Then, I rearranged the data.
+
+```{r Part B 2}
+summary(PartB)
+knitr::kable(PartB, caption = "Body and brain weight")
+# scatter plot and fitted simple linear model
+plot(x = PartB$BodyWeight, y = PartB$BrainWeight,
+     col = "red", pch = 16,
+     xlab = 'Weight of body (kg)',
+     ylab = 'Weight of brain (g)')
+abline(lm(BrainWeight ~ BodyWeight, PartB),
+       col = "green")
+legend(x = "bottomright", legend = c("Raw data", "Fitted line"),
+       col = c("red","green"), lty = c(0,1), pch = c(16,NA))
+```
+
+The summary of the data is presented in the table and the scatter plot between Body Weight and Brain Weight is also presented.  
+
+## Part C
+```{r Part C 1}
+library(data.table)
+PartC <- read.delim("https://www2.isye.gatech.edu/~jeffwu/wuhamadabook/data/LongJumpData.dat",header = FALSE, skip = 1, sep = " ")
+colnames(PartC) <- rep(c("year", "long jump"), 4)
+PartC <- rbind(PartC[,1:2], PartC[,3:4], PartC[,5:6], PartC[1:4, 7:8])
+```
+
+I imported data of Part C and renamed the columns as "year" and "long jump". 
+
+```{r Part C 2}
+PartC$year <- PartC$year + 1900
+# show the table of data (first 6 observations)
+knitr::kable(PartC, caption = "Gold Medal performance for Olympic Men’s Long Jump")
+summary(PartC)
+# scatter plot and fitted simple linear model
+plot(PartC, col = "purple", lwd = 1,
+     type = 'l',
+     xlab = 'Year',
+     ylab = 'Gold Medal performance for Men’s Long Jump (inch)')
+```
+
+The summary of the data of Part C is presented in table above. I also drew a scatter plot between year and gold medal performance for men's long jump.
+
+## Part D
+
+```{r Part Dn1}
+PartD <- fread("https://www2.isye.gatech.edu/~jeffwu/wuhamadabook/data/tomato.dat",header = FALSE, skip = 0, sep = " ", sep2 = ",")
+colnames(PartD) <- c("category", "10000", "20000", "30000")
+PartD <- separate(data = PartD, col = '10000',into = c("10000.1", "10000.2", "10000.3"),
+               remove = TRUE, sep = ',')
+PartD <- separate(data = PartD, col = '20000',into = c("20000.1", "20000.2", "20000.3"),
+               remove = TRUE, sep = ',')
+PartD <- separate(data = PartD, col = '30000',into = c("30000.1", "30000.2", "30000.3"),
+               remove = TRUE, sep = ',')
+```
+
+I imported the data in Part D and renamed the columns as "category", "10000", "20000", and "30000". Then, separated the columns by three.
+
+```{r Part D 2}
+PartD <- melt(PartD, id.vars = "category")
+# separate columns to Planting Density and measurement
+PartD <- separate(data = PartD, col = 'variable',
+               into = c("PlantingDensity", "measurement"),remove = TRUE)
+PartD$category <- factor(PartD$category)
+PartD$PlantingDensity <- factor(PartD$PlantingDensity)
+PartD$measurement <- factor(PartD$measurement)
+PartD$value <- as.numeric(PartD$value)
+knitr::kable(head(PartD), caption = "Measurements of tomato yield")
+knitr::kable(summary(PartD), caption="Summary of variables")
+PartDplot <- aggregate(x = PartD$value, by = list(PartD$category, PartD$PlantingDensity), FUN = mean)
+# plot the yield by category and Planting Density
+barplot(x ~ Group.1 + Group.2,
+        data = PartDplot,
+        beside = TRUE,
+        col = c("orange", "blue"),
+        xlab = "Planting Density",
+        ylab = "Mean value of measurements for Yield",
+        ylim = c(0,30),
+        border = NA)
+legend("top", c("Ife 1", "Pusa Early Dwarf"),
+       fill = c("orange", "blue"),
+       border = NA, horiz = TRUE)
+```
+
+I showed the summary of the data by table and drew a plot which shows the mean value of measurements for tomato yield.
+
+
+## Part E
+
+```{r message = FALSE, warning = FALSE, fig.cap = "Larvae counts in different blocks"}
+library(ggplot2)
+PartE <- read.delim("https://www2.isye.gatech.edu/~jeffwu/wuhamadabook/data/LarvaeControl.dat",header = FALSE, skip = 3, sep = " ")
+PartE <- PartE[,colSums(is.na(PartE))<nrow(PartE)]
+colnames(PartE) <- c("Block","Age1.Treatment1","Age1.Treatment2","Age1.Treatment3","Age1.Treatment4","Age1.Treatment5","Age2.Treatment1","Age2.Treatment2","Age2.Treatment3","Age2.Treatment4","Age2.Treatment5")
+PartE <- melt(as.data.table(PartE), id.vars = "Block")
+PartE <- separate(data = PartE, col = 'variable', into = c("age", "treatment"), remove = TRUE)
+PartE$Block <- factor(PartE$Block)
+PartE$age <- factor(PartE$age)
+PartE$treatment <- factor(PartE$treatment)
+knitr::kable(PartE, caption = "Larvae counts at two ages")
+knitr::kable(summary(PartE), caption="Summary of variables")
+ggplot(PartE, aes(y = value, x = Block, 
+               color = treatment,
+               shape = age))+
+  geom_point(size = 4)+
+  ylab("Larvae counts")
+```
+
+I imported the data of Part E and renamed the columns as "Block", "Age1.Treatment1", "Age1.Treatment2", "Age1.Treatment3", "Age1.Treatment4", "Age1.Treatment5", "Age2.Treatment1", "Age2.Treatment2", "Age2.Treatment3", "Age2.Treatment4", "Age2.Treatment5".
+Also the summaries of the data are presented in tables above and drew a plot between Block and Larvae counts.
+
+# Problem 5
+I knitted this document to pdf and pushed to GitHub.
+
+
